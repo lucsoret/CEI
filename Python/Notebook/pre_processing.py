@@ -4,6 +4,8 @@ import pylab
 import os
 import numpy as np
 import matplotlib.pyplot as plt
+import scipy
+
 
 from scipy import ndimage as ndi
 from skimage.filters import roberts, sobel
@@ -89,3 +91,20 @@ def center(image):
     im_mean = 0.25
     image = image-im_mean
     return image
+
+def resample(input_image, scan, new_spacing=[1,1,1]):
+    
+    #L espacement tel qu il est donne
+    prior_spacing = np.array([scan[0].SliceThickness] + scan[0].PixelSpacing, dtype=np.float32)
+    #Le facteur de dilatation pour avoir notre nouvel espacement
+    resize_factor = prior_spacing / new_spacing
+    #Nouvel dimension de l image totale (cad toutes les slices)
+    new_real_shape = input_image.shape * resize_factor
+    #Mieux avec quelque chose d'entier
+    new_shape = np.round(new_real_shape)
+    
+    real_resize_factor = new_shape / input_image.shape
+    new_spacing = prior_spacing / real_resize_factor    
+    #La fonction qui gere tout : scipy.ndimage
+    output_image = scipy.ndimage.interpolation.zoom(input_image, real_resize_factor, mode='nearest')
+    return output_image, new_spacing
