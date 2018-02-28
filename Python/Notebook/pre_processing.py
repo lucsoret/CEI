@@ -78,9 +78,7 @@ def normalize(image):
 	MIN_BOUND = -1024
 	MAX_BOUND = 400
 	image = image.astype(np.float16)
-	image = (image - MIN_BOUND) / (MAX_BOUND - MIN_BOUND)
-	image[image>1] = 1.
-	image[image<0] = 0.
+	image = image / (MAX_BOUND - MIN_BOUND)
 	return image
 
 
@@ -88,7 +86,8 @@ def normalize(image):
 
 def center(image):
     #Trop complique de calculer sur toutes les donnees la moyenne, 0.25 est la moyenne empirique, ca sera suffisant
-    im_mean = 0.25
+    #POUR L INSTANT, ON NE SE SERT PAS DU CENTERING (cf notebook), ON REVIENDRA PEUT ETRE ICI PLUS TARD
+    im_mean = 0
     image = image-im_mean
     return image
 
@@ -108,3 +107,31 @@ def resample(input_image, scan, new_spacing=[1,1,1]):
     #La fonction qui gere tout : scipy.ndimage
     output_image = scipy.ndimage.interpolation.zoom(input_image, real_resize_factor, mode='nearest')
     return output_image, new_spacing
+
+
+def zero_padding(im,max_z=400,max_x=450,max_y=450):
+    #Les dimensions sont prises empiriquement, au vu des shape montrees precedemment 
+    borders = (max_z,max_x,max_y)
+    fill_total = [[0,0],[0,0],[0,0]]
+    for i in range(3):
+        current_shape = im.shape[i]
+        if (current_shape < borders[i]):
+            fill = borders[i] - current_shape
+            fill_left = fill/2
+            fill_right = fill/2 + fill % 2
+            fill_total[i] = (fill_left,fill_right)
+    im = np.pad(im,((fill_total[0][0],fill_total[0][1]),(fill_total[1][0],fill_total[1][1]),(fill_total[2][0],fill_total[2][1])),'constant',constant_values=0)
+    #Si jamais notre image depasse les dimensions du zero padding, on va la cut de base
+    im = im[0:max_z,0:max_x,0:max_y]
+    return im
+
+#Fait tout le pre-processing sur une image
+def full_process(patient_path,max_z=400,max_x=450,max_y=450):
+	patient = load_scan(patient_path)
+	image = PixelData_to_HU(patient)
+	image,space = resample(image,patient)
+	image = np.stack([get_segmented_lungs(s) for s in image])
+	image =  np.stack([center(normalize(s)) for s in image])
+	image = zero_padding(image,max_z,max_x,max_y)
+	return image
+
