@@ -246,7 +246,7 @@ if __name__ == "__main__":
 	images_mhd_path = [os.path.join(INPUT_FOLDER,mhd) for mhd in images_mhd]
 	cands = pd.read_csv('/home/lucsoret/Projet/Supelec/CEI/Data/LUNA16/csv/annotations.csv')
 
-   	##Liste des cands pour chaque image
+   	##Liste des cands pour chaque image, on depasse un peu mais rien de grave
 	cands_list = []
 	for i in range(0,len(images_mhd)):
 		cands_list.append(cands[cands['seriesuid'] == images[i][0:-4]])
@@ -258,5 +258,7 @@ if __name__ == "__main__":
 
 for i,mhd_path in enumerate(images_mhd_path):
 	
-	create_nodule_mask(mhd_path, cands_list[i], im_mhd[0:-4],processed_folder)
-	print(i)
+	#Inutile de générer un masque pour un patient qui n'a pas de nodules
+	if len(cands[cands['seriesuid'] ==  images[i][0:-4]] > 0):
+		create_nodule_mask(mhd_path, cands_list[i], im_mhd[0:-4],processed_folder)
+		print(i)
