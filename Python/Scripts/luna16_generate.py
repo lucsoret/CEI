@@ -256,9 +256,9 @@ if __name__ == "__main__":
 	processed_folder = '/home/lucsoret/Projet/Supelec/CEI/Data/LUNA16/Images/processed/'
 
 
-for i,mhd_path in enumerate(images_mhd_path):
+	for i,mhd_path in enumerate(images_mhd_path):
 	
-	#Inutile de générer un masque pour un patient qui n'a pas de nodules
-	if len(cands[cands['seriesuid'] ==  images[i][0:-4]] > 0):
-		create_nodule_mask(mhd_path, cands_list[i], im_mhd[0:-4],processed_folder)
-		print(i)
+		#Inutile de générer un masque pour un patient qui n'a pas de nodules
+		if len(cands[cands['seriesuid'] ==  images[i][0:-4]] > 0):
+			create_nodule_mask(mhd_path, cands_list[i], im_mhd[0:-4],processed_folder)
+			print(i)
