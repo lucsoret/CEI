@@ -61,6 +61,7 @@ def seq(start, stop, step=1):
 This function is used to create spherical regions in binary masks
 at the given locations and radius.
 '''
+
 def draw_circles(image,cands,origin,spacing):
     #make empty matrix, which will be filled with the mask
     RESIZE_SPACING = [1, 1, 1]
@@ -87,8 +88,12 @@ def draw_circles(image,cands,origin,spacing):
                 for z in noduleRange:
                     coords = world_2_voxel(np.array((coord_z+z,coord_y+y,coord_x+x)),origin,spacing)
                     if (np.linalg.norm(image_coord-coords) * RESIZE_SPACING[0]) < radius:
-                        #ICI
-                        image_mask[int(coords[0]),int(coords[1]),int(coords[2])] = int(1)
+                        
+                        mask_x = int(max(0,min(image_mask.shape[0]-1,coords[0])))
+                        mask_y = int(max(0,min(image_mask.shape[1]-1,coords[1])))
+                        mask_z = int(max(0,min(image_mask.shape[2]-1,coords[2])))
+
+                        image_mask[mask_x,mask_y,mask_z] = int(1)
 
     return image_mask
 
@@ -220,12 +225,12 @@ def create_nodule_mask(imagePath, cands, imageName,path):
         nodule_mask_512[z, upper_offset:-lower_offset,upper_offset:-lower_offset] = nodule_mask[z,:,:]
 
     # save images.    
-    np.save(path + imageName + '_lung_img.npz', lung_img_512)
+    #np.save(path + imageName + '_lung_img.npz', lung_img_512)
     #np.save(path + imageName + '_lung_mask.npz', lung_mask_512)
-    np.save(path + imageName + '_nodule_mask.npz', nodule_mask_512)
+    #np.save(path + imageName + '_nodule_mask.npz', nodule_mask_512)
     
     #return
-    return lung_img,lung_img_512
+    return lung_img_512,nodule_mask_512
 
 
 if __name__ == "__main__":
@@ -244,6 +249,8 @@ if __name__ == "__main__":
 			images_mhd.append(images[i])
 
 	images_mhd_path = [os.path.join(INPUT_FOLDER,mhd) for mhd in images_mhd]
+
+
 	cands = pd.read_csv('/home/lucsoret/Projet/Supelec/CEI/Data/LUNA16/csv/annotations.csv')
 
    	##Liste des cands pour chaque image, on depasse un peu mais rien de grave
@@ -254,11 +261,26 @@ if __name__ == "__main__":
 
 
 	processed_folder = '/home/lucsoret/Projet/Supelec/CEI/Data/LUNA16/Images/processed/'
+	slice_folder = '/home/lucsoret/Projet/Supelec/CEI/Data/LUNA16/Images/processed/subset0/slices'
 
 
-	for i,mhd_path in enumerate(images_mhd_path):
+	for pos,mhd_path in enumerate(images_mhd_path):
 	
-		#Inutile de générer un masque pour un patient qui n'a pas de nodules
-		if len(cands[cands['seriesuid'] ==  images[i][0:-4]] > 0):
-			create_nodule_mask(mhd_path, cands_list[i], im_mhd[0:-4],processed_folder)
-			print(i)
+		#Inutile de gener un masque pour un patient qui n'a pas de nodules
+		if (len(cands[cands['seriesuid'] ==  images_mhd[pos][0:-4]]) > 0):
+			im_mhd = images_mhd[pos]
+			lung,nodule = create_nodule_mask(mhd_path, cands_list[pos], im_mhd[0:-4],processed_folder)
+			print(pos)
+			if (np.sum(nodule) != 0):
+				for s in range(lung.shape[0]):
+					lung_slice = lungs[s]
+					nodule_slice = nodule[s]
+					if (np.sum(nodulce_slice) != 0):
+						print('pos : {} , slice : {}'.format(str(pos),str(s)))
+						print(im_mhd[0:-4])
+						np.save(processed_folder + 'slices/' + im_mhd[0:-4] + "_" + str(s) + '_lung_img.npz' , lung_slice)
+						np.save(processed_folder + 'slices/' + im_mhd[0:-4] + "_" + str(s) + '_nodule_mask.npz'  , nodule_slice)                                
+	toc = time.clock()
+    
+	print(toc-tic)
+
