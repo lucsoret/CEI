@@ -8,7 +8,6 @@ from skimage.segmentation import clear_border
 from skimage import data
 from scipy import ndimage as ndi
 import matplotlib.pyplot as plt
-from mpl_toolkits.mplot3d.art3d import Poly3DCollection
 import dicom
 import scipy.misc
 
@@ -18,7 +17,6 @@ import os
 import pandas as pd
 import scipy.ndimage
 from skimage.segmentation import clear_border
-import pylab
 
 def load_itk(filename):
     # Reads the image using SimpleITK
