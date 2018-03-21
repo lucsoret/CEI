@@ -1,26 +1,6 @@
 import numpy as np
 import os
-from pre_processing import full_process
-import SimpleITK as sitk
-import numpy as np
-import os
-import pandas as pd
-import scipy.ndimage
-from skimage.segmentation import clear_border
-import pylab
-import skimage, os
-from skimage.morphology import ball, disk, dilation, binary_erosion, remove_small_objects, erosion, closing, reconstruction, binary_closing
-from skimage.measure import label,regionprops, perimeter
-from skimage.morphology import binary_dilation, binary_opening
-from skimage.filters import roberts, sobel
-from skimage import measure, feature
-from skimage.segmentation import clear_border
-from skimage import data
-from scipy import ndimage as ndi
-import matplotlib.pyplot as plt
-from mpl_toolkits.mplot3d.art3d import Poly3DCollection
-import dicom
-import scipy.misc
+
 from keras.layers import Input, merge, Conv2D, MaxPooling2D, UpSampling2D, Dropout, Cropping2D
 from keras.models import Sequential
 from keras.layers import Dense, Dropout, Activation, Flatten
