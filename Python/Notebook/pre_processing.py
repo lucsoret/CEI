@@ -52,10 +52,10 @@ def PixelData_to_HU(slices):
 
 
 
-def get_segmented_lungs(im):
+def get_segmented_lungs(im,seuil=-500):
     
     #Seuillage
-    binary = im < -500
+    binary = im < seuil
     
     #Gestion du bord
     binary = clear_border(binary)
