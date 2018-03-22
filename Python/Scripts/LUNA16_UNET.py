@@ -13,6 +13,8 @@ from keras import backend as K
 from keras.models import Sequential
 from keras import models
 from keras import optimizers
+from keras.callbacks import TensorBoard
+
 
 import numpy as np
 
@@ -75,6 +77,17 @@ def dice_coef(y_true, y_pred):
 
 def dice_coef_loss(y_true, y_pred):
     return -dice_coef(y_true, y_pred)
+
+
+def generate_unique_logpath(logdir, raw_run_name):
+        i = 0
+        while(True):
+                run_name = raw_run_name + "-" + str(i)
+                log_path = os.path.join(logdir, run_name)
+                if not os.path.isdir(log_path):
+                        return log_path
+                i = i + 1
+
 
 os.environ['TF_CPP_MIN_LOG_LEVEL'] = '2'
 
@@ -155,8 +168,10 @@ if __name__ == "__main__":
 	    if name[-16:-8] == "lung_img":
 	        list_IDs.append(name[0:-17])
 
-
-
+	#Tensorboard
+	run_name = "linear"
+	logpath = generate_unique_logpath("./logs_linear", run_name)
+	tbcb = TensorBoard(log_dir=logpath)
 
 	# Parameters
 	params = {'dim_x': 512,
@@ -170,8 +185,9 @@ if __name__ == "__main__":
 
 	model = unet()
 
-	model.fit_generator(generator = training_generator,
+	history = model.fit_generator(generator = training_generator,
 	                    steps_per_epoch = 20,
 	                    epochs = 10,
 	                    validation_data = validation_generator,
-	                    validation_steps = 20)
+	                    validation_steps = 20,
+	                    callbacks=[tbcb])
