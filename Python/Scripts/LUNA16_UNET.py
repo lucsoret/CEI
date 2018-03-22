@@ -191,3 +191,4 @@ if __name__ == "__main__":
 	                    validation_data = validation_generator,
 	                    validation_steps = 20,
 	                    callbacks=[tbcb])
+	model.save('/home/lucsoret/Projet/Supelec/CEI/Data/LUNA16/UNET/h5/run_1.h5')
