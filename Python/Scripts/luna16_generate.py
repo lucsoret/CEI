@@ -233,7 +233,7 @@ def create_nodule_mask(imagePath, cands, imageName,path):
 
 if __name__ == "__main__":
     
-	INPUT_FOLDER = '/home/lucsoret/Projet/Supelec/CEI/Data/LUNA16/Images/subset0'
+	INPUT_FOLDER = '/home/lucsoret/Projet/Supelec/CEI/Data/LUNA16/Images/subset4'
 	patients_short = os.listdir(INPUT_FOLDER)
 
 	images = os.listdir(INPUT_FOLDER)
@@ -254,12 +254,12 @@ if __name__ == "__main__":
    	##Liste des cands pour chaque image, on depasse un peu mais rien de grave
 	cands_list = []
 	for i in range(0,len(images_mhd)):
-		cands_list.append(cands[cands['seriesuid'] == images[i][0:-4]])
+		cands_list.append(cands[cands['seriesuid'] == images_mhd[i][0:-4]])
 
 
 
 	processed_folder = '/home/lucsoret/Projet/Supelec/CEI/Data/LUNA16/Images/processed/'
-	slice_folder = '/home/lucsoret/Projet/Supelec/CEI/Data/LUNA16/Images/processed/subset0/slices'
+	slice_folder = '/home/lucsoret/Projet/Supelec/CEI/Data/LUNA16/Images/processed/subset4/slices'
 
 
 	for pos,mhd_path in enumerate(images_mhd_path):
@@ -271,14 +271,11 @@ if __name__ == "__main__":
 			print(pos)
 			if (np.sum(nodule) != 0):
 				for s in range(lung.shape[0]):
-					lung_slice = lungs[s]
+					lung_slice = lung[s]
 					nodule_slice = nodule[s]
-					if (np.sum(nodulce_slice) != 0):
+					if (np.sum(nodule_slice) != 0):
 						print('pos : {} , slice : {}'.format(str(pos),str(s)))
 						print(im_mhd[0:-4])
-						np.save(processed_folder + 'slices/' + im_mhd[0:-4] + "_" + str(s) + '_lung_img.npz' , lung_slice)
-						np.save(processed_folder + 'slices/' + im_mhd[0:-4] + "_" + str(s) + '_nodule_mask.npz'  , nodule_slice)                                
-	toc = time.clock()
-    
-	print(toc-tic)
-
+						np.save(slice_folder + '/' + im_mhd[0:-4] + "_" + str(s) + '_lung_img.npz' , lung_slice)
+						np.save(slice_folder + '/' + im_mhd[0:-4] + "_" + str(s) + '_nodule_mask.npz'  , nodule_slice)                                
+	
