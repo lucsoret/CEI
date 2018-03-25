@@ -154,36 +154,45 @@ def unet():
 
 	return model
 
+def generate_list_ID(folder):
+	np_list = os.listdir(folder)
+	list_IDs = []
+	for i,name in enumerate(np_list):
+		if name[-16:-8] == "lung_img":
+			list_IDs.append(name[0:-17])
+	return list_IDs
+
 
 if __name__ == "__main__":
 
-	TRAIN_FOLDER = '/home/lucsoret/Projet/Supelec/CEI/Data/LUNA16/Images/processed/subset0/slices'
-	VAL_FOLDER = '/home/lucsoret/Projet/Supelec/CEI/Data/LUNA16/Images/processed/subset0/slices'
+	TRAIN_FOLDER = '/usr/users/promo2017/soret_luc/Projets/CEI/Data/LUNA16/Images/processed/TRAIN'
+	VAL_FOLDER = '/usr/users/promo2017/soret_luc/Projets/CEI/Data/LUNA16/Images/processed/VAL'
 
-	list_npy = os.listdir(TRAIN_FOLDER)
 
-	list_IDs = []
-
-	for i,name in enumerate(list_npy):
-	    if name[-16:-8] == "lung_img":
-	        list_IDs.append(name[0:-17])
+	list_IDs_TRAIN = generate_list_ID(TRAIN_FOLDER)
+	list_IDs_VAL = generate_list_ID(VAL_FOLDER)
 
 	#Tensorboard
-	run_name = "linear"
-	logpath = generate_unique_logpath("./logs_linear", run_name)
+	run_name = "UNET"
+	logpath = generate_unique_logpath("/usr/users/promo2017/soret_luc/Projets/CEI/Data/LUNA16/UNET/logs_linear", run_name)
 	tbcb = TensorBoard(log_dir=logpath)
 
 	# Parameters
 	params = {'dim_x': 512,
 	          'dim_y': 512,
 	          'dim_z': 1,
-	          'batch_size': 1,
+	          'batch_size': 4,
 	          'shuffle': True}
 
-	training_generator = DataGenerator(**params).generate(list_IDs,TRAIN_FOLDER)
-	validation_generator = DataGenerator(**params).generate(list_IDs,VAL_FOLDER)
+	training_generator = DataGenerator(**params).generate(list_IDs_TRAIN,TRAIN_FOLDER)
+	validation_generator = DataGenerator(**params).generate(list_IDs_VAL,VAL_FOLDER)
 
-	model = unet()
+	#A changer si from scratch
+	keras.losses.dice_coef_loss = dice_coef_loss
+	keras.metrics.dice_coef = dice_coef
+	model_path_init = '/usr/users/promo2017/soret_luc/Projets/CEI/Data/LUNA16/UNET/h5/UNET-0'
+	model = load_model(model_path_init)
+	#model = unet()
 
 	history = model.fit_generator(generator = training_generator,
 	                    steps_per_epoch = 20,
@@ -191,4 +200,5 @@ if __name__ == "__main__":
 	                    validation_data = validation_generator,
 	                    validation_steps = 20,
 	                    callbacks=[tbcb])
-	model.save('/home/lucsoret/Projet/Supelec/CEI/Data/LUNA16/UNET/h5/run_1.h5')
+	model_path = generate_unique_logpath('/home/lucsoret/Projet/Supelec/CEI/Data/LUNA16/UNET/h5',run_name)
+	model.save(model_path)
