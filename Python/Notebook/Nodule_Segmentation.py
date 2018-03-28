@@ -57,6 +57,7 @@ def get_centers_nodules(nodule_mask):
     return center_full, nb_nodules
 
 ##Pour récupérer le path des lung_img pour le patient dont on précise l'ID
+##Attention, si l'INPUT FOLDER change, il faut faire varier les indices dans la condition if pour bien toujours de récupérer l'ID du patient à partir de images_path_lung_img[i]
 def get_patients_path_lung_img(images_path_lung_img, ID='1.3.6.1.4.1.14519.5.2.1.6279.6001.137763212752154081977261297097'):
     patients_path_lung_img = []
     for i in range(0,len(images_path_lung_img)):
