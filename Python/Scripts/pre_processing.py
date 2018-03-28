@@ -50,28 +50,56 @@ def PixelData_to_HU(slices):
     
     return np.array(image)
 
-
-
 def get_segmented_lungs(im,seuil=-500):
     
-    #Seuillage
+    '''
+    Segmente le poumon pour une slice 2D, cf le notebook pre_processing
+    '''
+    
+
+    
+    #Step 1: Convertion en image binaire, seuil de 604
+    
     binary = im < seuil
     
-    #Gestion du bord
-    binary = clear_border(binary)
+    #Step 2: Enleve les bords de l'image pour garder que le contenu
     
-    #Closing
+    cleared = clear_border(binary)
+  
+    #Step 3: On labelise l image, cette operation permet de scinder une image binaire en differente zone, selon les contacts entre les pixels
+
+    label_image = label(cleared)
+
+    
+    #Une fois la labelisation faite, on va garder les deux regions les plus grandes, correspondants ainsi aux deux poumons
+    
+    areas = [r.area for r in regionprops(label_image)]
+    areas.sort()
+    if len(areas) > 2:
+        for region in regionprops(label_image):
+            if region.area < areas[-2]:
+                for coordinates in region.coords:                
+                       label_image[coordinates[0], coordinates[1]] = 0
+    binary = label_image > 0
+
+    #Step 4: Erosion pour separer les contacts avec les vaisseaux sanguins
+    selem = disk(2)
+    binary = binary_erosion(binary, selem)
+    
+    #Step 5: Closure, pour garder les nodules attachees aux parois des poumons
     selem = disk(10)
     binary = binary_closing(binary, selem)
     
-    #Filling
-    edges = roberts(binary)
-    binary= ndi.binary_fill_holes(edges)
+    #Step 6: Remplissage
     
-    #Masque
+    edges = roberts(binary)
+    binary = ndi.binary_fill_holes(edges)
+    
+    #Step 7: Application du masque a l image d entree
+    
     get_high_vals = binary == 0
     im[get_high_vals] = 0
-    
+
     return im
 
 def normalize(image):

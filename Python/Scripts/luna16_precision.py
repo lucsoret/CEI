@@ -33,6 +33,9 @@ import keras.losses
 import keras.metrics
 from keras.models import load_model
 
+'''
+Simple script calculant la precision sur les fichiers TEST
+'''
 # change the loss function
 def dice_coef(y_true, y_pred):
     smooth = 1.

@@ -1,6 +1,8 @@
 import numpy as np
 import os
 from pre_processing import full_process
+
+'''Un exemple de changement du constructeur DataGenerator pour l adapter a ntore cas'''
 class DataGenerator(object):
   'Generates data for Keras'
   def __init__(self, dim_x = 450, dim_y = 450, dim_z = 400, batch_size = 1, shuffle = True):
